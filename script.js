@@ -22,6 +22,14 @@ interact('.squares').draggable({
         }
     })
 
+     function checkWinCondition() {
+                    const totalSquares = document.querySelectorAll('.squares').length;
+                    const correctSquares = document.querySelectorAll('.squares.isCorrect').length;
+                    console.log('totalSquares:', totalSquares, 'correctSquares:', correctSquares);
+                    if (totalSquares > 0 && totalSquares === correctSquares) {
+                        alert('You win!');
+                    }
+                }
 interact('.target').dropzone({
         accept: '.squares',
         overlap: 0.75,
@@ -33,6 +41,16 @@ interact('.target').dropzone({
         ondragleave (event) {
             event.target.classList.remove('drop-target');
             event.relatedTarget.classList.remove('can-drop');
+            // Only remove isCorrect if leaving the correct target
+            const draggedId = event.relatedTarget.id;
+            const dropzoneId = event.target.id;
+            if (
+                (draggedId === 'red' && dropzoneId === 'redTarget') ||
+                (draggedId === 'green' && dropzoneId === 'greenTarget')
+            ) {
+                event.relatedTarget.classList.remove('isCorrect');
+            }
+    checkWinCondition();
         },
         ondrop (event) {
             event.relatedTarget.classList.remove('can-drop');
@@ -70,9 +88,17 @@ interact('.target').dropzone({
 
                 // Snap the square
                 event.relatedTarget.style.transform = `translate(${pos.x}px, ${pos.y}px)`;
-            }
+
+                //Give isCorrect class
+                event.relatedTarget.classList.add('isCorrect');
+            } else {
+                event.relatedTarget.classList.remove('isCorrect');
+            } 
+                   //Check for win condition
+                checkWinCondition();
         },
-    });
+    })
+
 // Store initial positions for reset
 const initialPositions = {};
 document.querySelectorAll('.squares').forEach(el => {
@@ -93,14 +119,6 @@ document.getElementById('resetButton').addEventListener('click', () => {
         // Remove any drag/drop classes
         el.classList.remove('drop-target');
         el.classList.remove('can-drop');
+        el.classList.remove('isCorrect');
     });
-
-    // Also clear the dropzone text and classes
-    document.querySelectorAll('.target').forEach(target => {
-        const p = target.querySelector('p');
-        if (p) p.textContent = '';
-        target.classList.remove('drop-target');
-        target.classList.remove('can-drop');
-    });
-});
-
+})
